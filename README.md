@@ -5,7 +5,7 @@ HttpToSocks5Proxy implements the IWebProxy interface and can therefore be used w
 
 Example use with the .NET HttpClient
 
-```
+```c#
 var proxy = new HttpToSocks5Proxy("127.0.0.1", 1080);
 var handler = new HttpClientHandler();
 handler.Proxy = proxy;
