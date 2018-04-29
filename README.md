@@ -20,3 +20,12 @@ Console.WriteLine("HTTPS GET: " + httpsGet.Result.Content.ReadAsStringAsync().Re
 Console.WriteLine("HTTP POST: " + httpPost.Result.Content.ReadAsStringAsync().Result);
 Console.WriteLine("HTTP GET: " + httpGet.Result.Content.ReadAsStringAsync().Result);
 ```
+</br>
+</br>
+
+Or with it's original use-case with the Telegram Bot Library (https://github.com/TelegramBots/Telegram.Bot)
+```c#
+var proxy = new HttpToSocks5Proxy(Socks5ServerAddress, Socks5ServerPort);
+proxy.ResolveHostnamesLocally = true; // Allows you to use proxies that are only allowing connections to Telegram
+TelegramBotClient Bot = new TelegramBotClient(API_KEY, proxy);
+```
