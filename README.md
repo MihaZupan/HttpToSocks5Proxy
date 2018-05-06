@@ -3,6 +3,7 @@ C# Http to Socks5 proxy implementation
 
 HttpToSocks5Proxy implements the IWebProxy interface and can therefore be used with all libraries that support HTTP/HTTPS proxies
 
+## Usage
 Example use with the .NET HttpClient
 
 ```c#
@@ -21,4 +22,14 @@ Or with it's original use-case with the Telegram Bot Library (https://github.com
 var proxy = new HttpToSocks5Proxy(Socks5ServerAddress, Socks5ServerPort);
 proxy.ResolveHostnamesLocally = true; // Allows you to use proxies that are only allowing connections to Telegram
 TelegramBotClient Bot = new TelegramBotClient(API_KEY, proxy);
+```
+
+## Installation
+
+Install as [NuGet package](https://www.nuget.org/packages/HttpToSocks5Proxy/):
+
+Package manager:
+
+```powershell
+Install-Package HttpToSocks5Proxy
 ```
