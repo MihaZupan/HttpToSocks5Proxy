@@ -13,7 +13,7 @@ handler.UseProxy = true;
 HttpClient hc = new HttpClient(handler, true);
 var httpsGet = hc.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https://httpbin.org/ip"));
 Console.WriteLine("HTTPS GET: " + httpsGet.Result.Content.ReadAsStringAsync().Result);
-</br>
+```
 </br>
 
 Or with it's original use-case with the Telegram Bot Library (https://github.com/TelegramBots/Telegram.Bot)
