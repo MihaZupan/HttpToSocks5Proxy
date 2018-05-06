@@ -1,6 +1,6 @@
 ﻿namespace MihaZupan.Socks5Proxy.Enums
 {
-    public enum Authentication
+    enum Authentication
     {
         NoAuthentication = 0,
         GSSAPI = 1,

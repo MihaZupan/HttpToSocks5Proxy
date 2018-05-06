@@ -1,6 +1,6 @@
 ﻿namespace MihaZupan.Socks5Proxy.Enums
 {
-    public enum Command
+    enum Command
     {
         Connect = 1,
         Bind = 2,

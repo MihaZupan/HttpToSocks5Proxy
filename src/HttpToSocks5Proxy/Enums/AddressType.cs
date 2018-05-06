@@ -1,6 +1,6 @@
 ﻿namespace MihaZupan.Socks5Proxy.Enums
 {
-    public enum AddressType
+    enum AddressType
     {
         IPv4 = 1,
         DomainName = 3,

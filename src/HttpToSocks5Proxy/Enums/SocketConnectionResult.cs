@@ -1,6 +1,6 @@
 ﻿namespace MihaZupan.Socks5Proxy.Enums
 {
-    public enum SocketConnectionResult
+    enum SocketConnectionResult
     {
         OK = 0,
         GeneralSocksServerFailure = 1,
