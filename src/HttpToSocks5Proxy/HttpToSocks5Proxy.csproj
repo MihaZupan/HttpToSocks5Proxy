@@ -7,7 +7,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>MihaZupan</Authors>
     <Company>MihaZupan</Company>
-    <Description></Description>
+    <Description>This is a class that implements the IWebProxy interface to act as an HTTP(S) proxy while connecting to a SOCKS5 server behind the scenes.</Description>
     <Copyright>Copyright © Miha Zupan 2018</Copyright>
     <PackageProjectUrl>https://github.com/MihaZupan/HttpToSocks5Proxy</PackageProjectUrl>
     <PackageLicenseUrl>https://raw.githubusercontent.com/MihaZupan/HttpToSocks5Proxy/master/LICENSE</PackageLicenseUrl>
@@ -16,6 +16,7 @@
     <PackageTags>Proxy;Socks5;Socks;Http;Telegram;Bot</PackageTags>
     <Product>HttpToSocks5Proxy</Product>
     <PackageId>HttpToSocks5Proxy</PackageId>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
 </Project>
