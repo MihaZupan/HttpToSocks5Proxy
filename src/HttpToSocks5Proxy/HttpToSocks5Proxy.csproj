@@ -4,6 +4,18 @@
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
     <AssemblyName>MihaZupan.HttpToSocks5Proxy</AssemblyName>
     <RootNamespace>MihaZupan.HttpToSocks5Proxy</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>MihaZupan</Authors>
+    <Company>MihaZupan</Company>
+    <Description></Description>
+    <Copyright>Copyright © Miha Zupan 2018</Copyright>
+    <PackageProjectUrl>https://github.com/MihaZupan/HttpToSocks5Proxy</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/MihaZupan/HttpToSocks5Proxy/master/LICENSE</PackageLicenseUrl>
+    <PackageIconUrl>https://telegram.org/img/tl_card_decentralized.gif</PackageIconUrl>
+    <RepositoryUrl>https://github.com/MihaZupan/HttpToSocks5Proxy.git</RepositoryUrl>
+    <PackageTags>Proxy;Socks5;Socks;Http;Telegram;Bot</PackageTags>
+    <Product>HttpToSocks5Proxy</Product>
+    <PackageId>HttpToSocks5Proxy</PackageId>
   </PropertyGroup>
 
 </Project>

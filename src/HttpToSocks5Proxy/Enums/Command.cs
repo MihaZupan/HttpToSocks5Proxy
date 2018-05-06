@@ -1,4 +1,4 @@
-﻿namespace MihaZupan.Proxy.Enums
+﻿namespace MihaZupan.Socks5Proxy.Enums
 {
     public enum Command
     {

@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using MihaZupan.Proxy.Enums;
+using MihaZupan.Socks5Proxy.Enums;
 
 namespace MihaZupan
 {
