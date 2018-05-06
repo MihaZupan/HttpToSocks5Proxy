@@ -1,10 +1,11 @@
-using System;
+﻿using System;
 using System.Text;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using MihaZupan.Proxy.Enums;
 
 namespace MihaZupan
 {
@@ -392,7 +393,7 @@ namespace MihaZupan
                     if (!doUsernamePasswordAuth)
                     {
                         // Proxy server is requesting UserPass auth even tho we did not allow it
-                        return SocketConnectionResult.InvalidProxyResponse;                        
+                        return SocketConnectionResult.InvalidProxyResponse;
                     }
                     else
                     {
@@ -413,12 +414,12 @@ namespace MihaZupan
                 }
                 else if (buffer[1] != (byte)Authentication.NoAuthentication)
                     return SocketConnectionResult.AuthenticationError;
-                
+
                 if (ResolveHostnamesLocally && GetAddressType(destAddress) == AddressType.DomainName)
                 {
                     destAddress = Resolve(destAddress).ToString();
                 }
-                
+
                 // SEND REQUEST
                 socks5Socket.Send(BuildRequestMessage(Command.Connect, GetAddressType(destAddress), destAddress, destPort));
 
@@ -473,41 +474,6 @@ namespace MihaZupan
 
 
         private const byte SocksVersion = 0x05;
-        enum SocketConnectionResult
-        {
-            OK = 0,
-            GeneralSocksServerFailure = 1,
-            ConnectionNotAllowedByRuleset = 2,
-            NetworkUnreachable = 3,
-            HostUnreachable = 4,
-            ConnectionRefused = 5,
-            TTLExpired = 6,
-            CommandNotSupported = 7,
-            AddressTypeNotSupported = 8,
-            UnknownError,
-            AuthenticationError,
-            ConnectionReset,
-            ConnectionError,
-            InvalidProxyResponse
-        }
-        enum Authentication
-        {
-            NoAuthentication = 0,
-            GSSAPI = 1,
-            UsernamePassword = 2
-        }
-        enum AddressType
-        {
-            IPv4 = 1,
-            DomainName = 3,
-            IPv6 = 4
-        }
-        enum Command
-        {
-            Connect = 1,
-            Bind = 2,
-            UdpAssociate = 3
-        }
 
         private static byte[] BuildHelloMessage(bool doUsernamePasswordAuth)
         {
