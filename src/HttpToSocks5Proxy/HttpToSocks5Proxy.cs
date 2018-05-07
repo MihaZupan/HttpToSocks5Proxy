@@ -526,8 +526,8 @@ namespace MihaZupan
         }
         private byte[] BuildAuthenticationMessage()
         {
-            byte[] usernameBytes = Encoding.UTF8.GetBytes(Socks5_Username);
-            byte[] passwordBytes = Encoding.UTF8.GetBytes(Socks5_Password);
+            byte[] usernameBytes = Encoding.ASCII.GetBytes(Socks5_Username);
+            byte[] passwordBytes = Encoding.ASCII.GetBytes(Socks5_Password);
 
             byte[] authMessage = new byte[3 + usernameBytes.Length + passwordBytes.Length];
             authMessage[0] = 0x01;
