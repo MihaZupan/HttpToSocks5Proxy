@@ -402,7 +402,7 @@ namespace MihaZupan
                         socks5Socket.Send(BuildAuthenticationMessage());
                         if (socks5Socket.Receive(buffer) != 2)
                             return SocketConnectionResult.InvalidProxyResponse;
-                        if (buffer[0] != SocksVersion)
+                        if (buffer[0] != SubnegotiationVersion)
                             return SocketConnectionResult.InvalidProxyResponse;
                         if (buffer[1] != 0)
                         {
@@ -472,7 +472,7 @@ namespace MihaZupan
             }
         }
 
-
+        private const byte SubnegotiationVersion = 0x01;
         private const byte SocksVersion = 0x05;
 
         private static byte[] BuildHelloMessage(bool doUsernamePasswordAuth)
@@ -530,7 +530,7 @@ namespace MihaZupan
             byte[] passwordBytes = Encoding.ASCII.GetBytes(Socks5_Password);
 
             byte[] authMessage = new byte[3 + usernameBytes.Length + passwordBytes.Length];
-            authMessage[0] = 0x01;
+            authMessage[0] = SubnegotiationVersion;
             authMessage[1] = (byte)usernameBytes.Length;
             Array.Copy(usernameBytes, 0, authMessage, 2, usernameBytes.Length);
             authMessage[2 + usernameBytes.Length] = (byte)passwordBytes.Length;
