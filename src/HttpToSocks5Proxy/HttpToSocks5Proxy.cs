@@ -530,7 +530,7 @@ namespace MihaZupan
             byte[] passwordBytes = Encoding.UTF8.GetBytes(Socks5_Password);
 
             byte[] authMessage = new byte[3 + usernameBytes.Length + passwordBytes.Length];
-            authMessage[0] = SocksVersion;
+            authMessage[0] = 0x01;
             authMessage[1] = (byte)usernameBytes.Length;
             Array.Copy(usernameBytes, 0, authMessage, 2, usernameBytes.Length);
             authMessage[2 + usernameBytes.Length] = (byte)passwordBytes.Length;
