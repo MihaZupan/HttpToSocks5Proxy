@@ -14,8 +14,6 @@ namespace MihaZupan
     /// </summary>
     public class HttpToSocks5Proxy : IWebProxy
     {
-        private Uri ProxyUri;
-
         #region IWebProxy
         /// <summary>
         /// Ignored by this <see cref="IWebProxy"/> implementation
@@ -37,6 +35,7 @@ namespace MihaZupan
         #endregion
 
         #region Internal HTTP proxy fields
+        private Uri ProxyUri;
         private Socket InternalServerSocket;
         private int InternalServerPort;
         #endregion
@@ -193,23 +192,41 @@ namespace MihaZupan
                 request = requestBuilder.ToString();
             }
 
-            if (hostHeader == null)
-            {
-                throw new Exception("Missing host header");
-            }
-            if (hostHeader == string.Empty)
-            {
-                throw new Exception("Invalid host header");
-            }
-
             string hostname;
             int port;
+
+            if (hostHeader == null || hostHeader == string.Empty)
+            {
+                string requestTarget = methodLine[1];
+                int colon = requestTarget.IndexOf(':');
+                if (colon == -1)
+                {
+                    hostname = requestTarget;
+                    port = connect ? 443 : 80;
+                }
+                else
+                {
+                    hostname = requestTarget.Substring(0, colon);
+                    port = int.Parse(requestTarget.Substring(colon + 1));
+                }
+            }
+            else
             {
                 int colon = hostHeader.IndexOf(':');
                 if (colon == -1)
                 {
-                    hostname = hostHeader;
-                    port = connect ? 443 : 80;
+                    string requestTarget = methodLine[1];
+                    colon = requestTarget.IndexOf(':');
+                    if (colon == -1)
+                    {
+                        hostname = hostHeader;
+                        port = connect ? 443 : 80;
+                    }
+                    else
+                    {
+                        hostname = hostHeader;
+                        port = int.Parse(requestTarget.Substring(colon + 1));
+                    }
                 }
                 else
                 {
