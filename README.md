@@ -1,44 +1,59 @@
 # HttpToSocks5Proxy
-C# Http to Socks5 proxy implementation
 
-HttpToSocks5Proxy implements the IWebProxy interface and can therefore be used with all libraries that support HTTP/HTTPS proxies
+This library allows you to connect over Socks5 proxies when using the .NET `HttpClient`.
+
+It implements the `IWebProxy` interface and can therefore be used with all libraries
+that support HTTP/HTTPS proxies.
 
 ## Usage with an HttpClient
-Example use with the .NET HttpClient
-
 ```c#
 using MihaZupan;
 
 var proxy = new HttpToSocks5Proxy("127.0.0.1", 1080);
-var handler = new HttpClientHandler();
-handler.Proxy = proxy;
-handler.UseProxy = true;
-HttpClient hc = new HttpClient(handler, true);
-var httpsGet = hc.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https://httpbin.org/ip"));
+var handler = new HttpClientHandler { Proxy = proxy };
+HttpClient httpClient = new HttpClient(handler, true);
+
+var httpsGet = httpClient.SendAsync(
+    new HttpRequestMessage(HttpMethod.Get, "https://httpbin.org/ip"));
+
 Console.WriteLine("HTTPS GET: " + httpsGet.Result.Content.ReadAsStringAsync().Result);
 ```
 
 ## Usage with Telegram.Bot library
-Or with its original use-case with the [Telegram Bot Library](https://github.com/TelegramBots/Telegram.Bot)
+The library was originally designed to fight censorship attempts against Telegram.
+
+Using it with the [Telegram Bot Library](https://github.com/TelegramBots/Telegram.Bot)
+is therefore a breeze.
 
 ```c#
 using MihaZupan;
 
-var proxy = new HttpToSocks5Proxy(Socks5ServerAddress, Socks5ServerPort);
+var proxy = new HttpToSocks5Proxy("my-socks-server.com", 1080);
 
-// Or if you need credentials for your proxy server:
-var proxy = new HttpToSocks5Proxy(Socks5ServerAddress, Socks5ServerPort, "username", "password");
+// Or if the proxy server requires credentials (gssapi is not supported):
+new HttpToSocks5Proxy("my-socks-server.com", 1080, "username", "password");
 
-// Allows you to use proxies that are only allowing connections to Telegram
-// Needed for some proxies
+// Some proxies limit target connections to a single IP address
+// If that is the case you have to resolve hostnames locally
 proxy.ResolveHostnamesLocally = true;
 
 TelegramBotClient Bot = new TelegramBotClient("API Token", proxy);
 ```
 
+## I need more latency
+Worry not, you can now chain SOCKS proxies with this library
+
+```c#
+var proxy = new HttpToSocks5Proxy(new[] {
+    new ProxyInfo("tor-proxy.com", 1080),
+    new ProxyInfo("random-socks.com", 1090),
+    new ProxyInfo("tor-proxy.com", 1080)
+});
+```
+
 ## Installation
 
-Install as [NuGet package](https://www.nuget.org/packages/HttpToSocks5Proxy/):
+Install as a [NuGet package](https://www.nuget.org/packages/HttpToSocks5Proxy/):
 
 Package manager:
 

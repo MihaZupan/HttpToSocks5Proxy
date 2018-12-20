@@ -1,4 +1,4 @@
-﻿namespace MihaZupan.Socks5Proxy.Enums
+﻿namespace MihaZupan.Enums.Socks5
 {
     enum Authentication
     {

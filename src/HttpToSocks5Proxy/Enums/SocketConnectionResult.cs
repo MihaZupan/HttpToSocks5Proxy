@@ -1,4 +1,4 @@
-﻿namespace MihaZupan.Socks5Proxy.Enums
+﻿namespace MihaZupan.Enums
 {
     enum SocketConnectionResult
     {
@@ -11,6 +11,9 @@
         TTLExpired = 6,
         CommandNotSupported = 7,
         AddressTypeNotSupported = 8,
+
+        // Library specific
+        InvalidRequest = int.MinValue,
         UnknownError,
         AuthenticationError,
         ConnectionReset,
