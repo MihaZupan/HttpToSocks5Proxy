@@ -263,7 +263,7 @@ namespace MihaZupan
                         requestBuilder.Append("\r\n");
                         requestBuilder.Append(headerLines[i]);
                     }
-                    if (headerName.IsHopByHopHeader())
+                    else if (!headerName.IsHopByHopHeader())
                     {
                         requestBuilder.Append("\r\n");
                         requestBuilder.Append(headerLines[i]);
