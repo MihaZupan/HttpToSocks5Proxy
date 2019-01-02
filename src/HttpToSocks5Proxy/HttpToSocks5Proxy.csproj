@@ -16,7 +16,7 @@
     <PackageTags>Proxy;Socks5;Socks;Http;Telegram;Bot</PackageTags>
     <Product>HttpToSocks5Proxy</Product>
     <PackageId>HttpToSocks5Proxy</PackageId>
-    <Version>1.1.1</Version>
+    <Version>1.1.2</Version>
   </PropertyGroup>
 
 </Project>
