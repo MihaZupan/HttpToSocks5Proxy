@@ -98,6 +98,7 @@ namespace MihaZupan
 
         private void OnAcceptCallback(IAsyncResult AR)
         {
+            if (Stopped) return;
             Socket clientSocket = InternalServerSocket.EndAccept(AR);
             InternalServerSocket.BeginAccept(new AsyncCallback(OnAcceptCallback), null);
             HandleRequest(clientSocket);
@@ -402,6 +403,14 @@ namespace MihaZupan
                 socket.Close();
             }
             catch { }
+        }
+
+        private bool Stopped = false;
+        public void StopInternalServer()
+        {
+            if (Stopped) return;
+            Stopped = true;
+            InternalServerSocket.Close();
         }
     }
 }
