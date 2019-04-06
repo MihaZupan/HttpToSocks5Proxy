@@ -248,7 +248,8 @@ namespace MihaZupan
 
                 requestBuilder.Append(methodLine[0]);
                 requestBuilder.Append(' ');
-                requestBuilder.Append(hostUri.AbsolutePath);
+                requestBuilder.Append(hostUri.PathAndQuery);
+                requestBuilder.Append(hostUri.Fragment);
                 requestBuilder.Append(' ');
                 requestBuilder.Append(methodLine[2]);
 
