@@ -333,13 +333,13 @@ namespace MihaZupan
 
             return true;
         }
-        private static bool TryReadHeaders(Socket clientSocket, out byte[] headesrBuffer, out int received, out int endOfHeader)
+        private static bool TryReadHeaders(Socket clientSocket, out byte[] headersBuffer, out int received, out int endOfHeader)
         {
             received = 0;
             endOfHeader = 0;
-            int offset = 0;
-            headesrBuffer = new byte[8192];
+            headersBuffer = new byte[8192];
             int left = 8192;
+            int offset;
             // According to https://stackoverflow.com/a/686243/6845657 even Apache gives up after 8KB
 
             do
@@ -350,12 +350,12 @@ namespace MihaZupan
                     return false;
                 }
                 offset = received;
-                int read = clientSocket.Receive(headesrBuffer, received, left, SocketFlags.None);
+                int read = clientSocket.Receive(headersBuffer, received, left, SocketFlags.None);
                 received += read;
                 left -= read;
             }
             // received - 3 is used because we could have read the start of the double new line in the previous read
-            while (!headesrBuffer.ContainsDoubleNewLine(Math.Max(0, received - 3), out endOfHeader));
+            while (!headersBuffer.ContainsDoubleNewLine(Math.Max(0, offset - 3), received, out endOfHeader));
 
             return true;
         }

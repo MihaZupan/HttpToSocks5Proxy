@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
@@ -9,8 +9,8 @@
     <Company>MihaZupan</Company>
     <Description>This is a class that implements the IWebProxy interface to act as an HTTP(S) proxy while connecting to a SOCKS5 server behind the scenes.</Description>
     <Copyright>Copyright © Miha Zupan 2018</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/MihaZupan/HttpToSocks5Proxy</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/MihaZupan/HttpToSocks5Proxy/master/LICENSE</PackageLicenseUrl>
     <PackageIconUrl>https://telegram.org/img/tl_card_decentralized.gif</PackageIconUrl>
     <RepositoryUrl>https://github.com/MihaZupan/HttpToSocks5Proxy.git</RepositoryUrl>
     <PackageTags>Proxy;Socks5;Socks;Http;Telegram;Bot</PackageTags>

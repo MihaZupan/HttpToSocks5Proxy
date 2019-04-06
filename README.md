@@ -13,10 +13,10 @@ var proxy = new HttpToSocks5Proxy("127.0.0.1", 1080);
 var handler = new HttpClientHandler { Proxy = proxy };
 HttpClient httpClient = new HttpClient(handler, true);
 
-var httpsGet = httpClient.SendAsync(
+var result = await httpClient.SendAsync(
     new HttpRequestMessage(HttpMethod.Get, "https://httpbin.org/ip"));
 
-Console.WriteLine("HTTPS GET: " + httpsGet.Result.Content.ReadAsStringAsync().Result);
+Console.WriteLine("HTTPS GET: " + await result.Content.ReadAsStringAsync());
 ```
 
 ## Usage with Telegram.Bot library

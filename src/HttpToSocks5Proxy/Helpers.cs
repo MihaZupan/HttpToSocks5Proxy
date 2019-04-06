@@ -19,13 +19,13 @@ namespace MihaZupan
             return SocketConnectionResult.ConnectionError;
         }
 
-        public static bool ContainsDoubleNewLine(this byte[] buffer, int offset, out int endOfHeader)
+        public static bool ContainsDoubleNewLine(this byte[] buffer, int offset, int limit, out int endOfHeader)
         {
             const byte R = (byte)'\r';
             const byte N = (byte)'\n';
 
             bool foundOne = false;
-            for (endOfHeader = offset; endOfHeader < buffer.Length; endOfHeader++)
+            for (endOfHeader = offset; endOfHeader < limit; endOfHeader++)
             {
                 if (buffer[endOfHeader] == N)
                 {

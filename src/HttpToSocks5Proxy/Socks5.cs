@@ -129,7 +129,7 @@ namespace MihaZupan
                     byte[] domainBytes = Encoding.UTF8.GetBytes(address);
                     addressLength = 1 + domainBytes.Length;
                     addressBytes = new byte[addressLength];
-                    addressBytes[0] = (byte)address.Length;
+                    addressBytes[0] = (byte)domainBytes.Length;
                     Array.Copy(domainBytes, 0, addressBytes, 1, domainBytes.Length);
                     break;
 
