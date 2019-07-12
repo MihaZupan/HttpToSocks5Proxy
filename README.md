@@ -1,4 +1,4 @@
-# HttpToSocks5Proxy
+# HttpToSocks5Proxy [![NuGet](https://img.shields.io/nuget/v/HttpToSocks5Proxy.svg)](https://www.nuget.org/packages/HttpToSocks5Proxy/)
 
 This library allows you to connect over Socks5 proxies when using the .NET `HttpClient`.
 
