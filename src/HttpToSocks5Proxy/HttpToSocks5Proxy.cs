@@ -3,7 +3,6 @@ using System.Text;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using MihaZupan.Enums;
 
@@ -78,8 +77,8 @@ namespace MihaZupan
         {
             if (internalServerPort < 0 || internalServerPort > 65535) throw new ArgumentOutOfRangeException(nameof(internalServerPort));
             if (proxyList == null) throw new ArgumentNullException(nameof(proxyList));
-            if (proxyList.Length == 0) throw new ArgumentException("proxyList is empty");
-            if (proxyList.Any(p => p == null)) throw new ArgumentNullException("Proxy in proxyList is null");
+            if (proxyList.Length == 0) throw new ArgumentException("proxyList is empty", nameof(proxyList));
+            if (proxyList.Any(p => p == null)) throw new ArgumentNullException(nameof(proxyList), "Proxy in proxyList is null");
 
             ProxyList = proxyList;
             InternalServerPort = internalServerPort;
@@ -99,9 +98,22 @@ namespace MihaZupan
         private void OnAcceptCallback(IAsyncResult AR)
         {
             if (Stopped) return;
-            Socket clientSocket = InternalServerSocket.EndAccept(AR);
-            InternalServerSocket.BeginAccept(new AsyncCallback(OnAcceptCallback), null);
-            HandleRequest(clientSocket);
+
+            Socket clientSocket = null;
+            try
+            {
+                clientSocket = InternalServerSocket.EndAccept(AR);
+            }
+            catch { }
+
+            try
+            {
+                InternalServerSocket.BeginAccept(new AsyncCallback(OnAcceptCallback), null);
+            }
+            catch { StopInternalServer(); }
+
+            if (clientSocket != null)
+                HandleRequest(clientSocket);
         }
         private void HandleRequest(Socket clientSocket)
         {
@@ -181,13 +193,12 @@ namespace MihaZupan
             {
                 if (success)
                 {
-                    RelayData(socks5Socket, clientSocket);
-                    RelayData(clientSocket, socks5Socket);
+                    SocketRelay.RelayBiDirectionally(socks5Socket, clientSocket);
                 }
                 else
                 {
-                    TryDisposeSocket(clientSocket);
-                    TryDisposeSocket(socks5Socket);
+                    clientSocket.TryDispose();
+                    socks5Socket.TryDispose();
                 }
             }
         }
@@ -365,46 +376,9 @@ namespace MihaZupan
             => socket.Send(Encoding.UTF8.GetBytes(text));
         private static void SendError(Socket socket, SocketConnectionResult error, string httpVersion = "HTTP/1.1 ")
             => SendString(socket, ErrorResponseBuilder.Build(error, httpVersion));
-        private static void RelayData(Socket source, Socket target)
-        {
-            Task.Run(() =>
-            {
-                try
-                {
-                    // ToDo: Async socket relaying to avoid hijacking two Tasks for the duration of the underlying connection
-                    int read;
-                    byte[] buffer = new byte[81920];
-                    while ((read = source.Receive(buffer, 0, buffer.Length, SocketFlags.None)) > 0)
-                    {
-                        target.Send(buffer, 0, read, SocketFlags.None);
-                    }
-                }
-                finally
-                {
-                    TryDisposeSocket(source);
-                    TryDisposeSocket(target);
-                }
-            });
-        }
 
         private static Socket CreateSocket()
             => new Socket(SocketType.Stream, ProtocolType.Tcp);
-        private static void TryDisposeSocket(Socket socket)
-        {
-            if (socket == null)
-                return;
-
-            try
-            {
-                socket.Shutdown(SocketShutdown.Both);
-            }
-            catch { }
-            try
-            {
-                socket.Close();
-            }
-            catch { }
-        }
 
         private bool Stopped = false;
         public void StopInternalServer()

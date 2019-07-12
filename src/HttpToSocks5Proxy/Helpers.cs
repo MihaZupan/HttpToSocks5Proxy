@@ -74,5 +74,21 @@ namespace MihaZupan
             }
             return AddressType.DomainName;
         }
+        public static void TryDispose(this Socket socket)
+        {
+            if (socket == null)
+                return;
+
+            try
+            {
+                socket.Shutdown(SocketShutdown.Both);
+            }
+            catch { }
+            try
+            {
+                socket.Close();
+            }
+            catch { }
+        }
     }
 }
