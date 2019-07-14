@@ -76,17 +76,34 @@ namespace MihaZupan
         }
         public static void TryDispose(this Socket socket)
         {
-            if (socket == null)
+            if (socket is null)
+                return;
+
+            if (socket.Connected)
+            {
+                try
+                {
+                    socket.Shutdown(SocketShutdown.Send);
+                }
+                catch { }
+            }
+            try
+            {
+                socket.Close();
+            }
+            catch { }
+        }
+        public static void TryDispose(this SocketAsyncEventArgs saea)
+        {
+            if (saea is null)
                 return;
 
             try
             {
-                socket.Shutdown(SocketShutdown.Both);
-            }
-            catch { }
-            try
-            {
-                socket.Close();
+                saea.UserToken = null;
+                saea.AcceptSocket = null;
+
+                saea.Dispose();
             }
             catch { }
         }

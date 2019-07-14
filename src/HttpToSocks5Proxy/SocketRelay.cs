@@ -8,14 +8,16 @@ namespace MihaZupan
         private SocketAsyncEventArgs RecSAEA, SendSAEA;
         private Socket Source, Target;
         private byte[] Buffer;
-        private int SendingOffset;
+
+        public bool Receiving;
         private int Received;
-        private int StackDepth;
-        private const int StackDepthCutoff = 256;
+        private int SendingOffset;
 
         public SocketRelay Other;
+        private bool Disposed = false;
+        private bool ShouldDispose = false;
 
-        public SocketRelay(Socket source, Socket target)
+        private SocketRelay(Socket source, Socket target)
         {
             Source = source;
             Target = target;
@@ -30,85 +32,78 @@ namespace MihaZupan
             };
             RecSAEA.SetBuffer(Buffer, 0, Buffer.Length);
             SendSAEA.SetBuffer(Buffer, 0, Buffer.Length);
-            RecSAEA.Completed += OnSaeaReceiveCompleted;
-            SendSAEA.Completed += OnSaeaSendCompleted;
+            RecSAEA.Completed += OnAsyncOperationCompleted;
+            SendSAEA.Completed += OnAsyncOperationCompleted;
+            Receiving = true;
         }
 
         private void OnCleanup()
         {
-            if (Other is null)
+            if (Disposed)
                 return;
+
+            Disposed = ShouldDispose = true;
+
+            Other.ShouldDispose = true;
+            Other = null;
 
             Source.TryDispose();
             Target.TryDispose();
-            try { RecSAEA?.Dispose(); } catch { }
-            try { SendSAEA?.Dispose(); } catch { }
+            RecSAEA.TryDispose();
+            SendSAEA.TryDispose();
 
             Source = Target = null;
             RecSAEA = SendSAEA = null;
             Buffer = null;
-
-            Other?.OnCleanup();
-            Other = null;
         }
 
-        public void StartRelaying()
+        private void Process()
         {
             try
             {
-                if (!Source.ReceiveAsync(RecSAEA))
+                while (true)
                 {
-                    OnReceived();
-                }
-            }
-            catch
-            {
-                OnCleanup();
-            }
-        }
-        private void OnReceived()
-        {
-            try
-            {
-                SendingOffset = 0;
-                Received = RecSAEA.BytesTransferred;
-
-                SendSAEA.SetBuffer(Buffer, 0, Received);
-
-                if (!Target.SendAsync(SendSAEA))
-                {
-                    OnSent();
-                }
-            }
-            catch
-            {
-                OnCleanup();
-            }
-        }
-        private void OnSent()
-        {
-            try
-            {
-                SendingOffset += SendSAEA.BytesTransferred;
-
-                while (SendingOffset != Received)
-                {
-                    SendSAEA.SetBuffer(Buffer, SendingOffset, Received - SendingOffset);
-
-                    if (Target.SendAsync(SendSAEA))
+                    if (ShouldDispose)
+                    {
+                        OnCleanup();
                         return;
+                    }
 
-                    SendingOffset += SendSAEA.BytesTransferred;
-                }
+                    if (Receiving)
+                    {
+                        Receiving = false;
+                        SendingOffset = -1;
 
-                if (++StackDepth == StackDepthCutoff)
-                {
-                    StackDepth = 0;
-                    Task.Run(StartRelaying);
-                }
-                else
-                {
-                    StartRelaying();
+                        if (Source.ReceiveAsync(RecSAEA))
+                            return;
+                    }
+                    else
+                    {
+                        if (SendingOffset == -1)
+                        {
+                            Received = RecSAEA.BytesTransferred;
+                            SendingOffset = 0;
+
+                            if (Received == 0)
+                            {
+                                ShouldDispose = true;
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            SendingOffset += SendSAEA.BytesTransferred;
+                        }
+
+                        if (SendingOffset != Received)
+                        {
+                            SendSAEA.SetBuffer(Buffer, SendingOffset, Received - SendingOffset);
+
+                            if (Target.SendAsync(SendSAEA))
+                                return;
+                        }
+                        else Receiving = true;
+                    }
                 }
             }
             catch
@@ -117,17 +112,10 @@ namespace MihaZupan
             }
         }
 
-        private static void OnSaeaReceiveCompleted(object _, SocketAsyncEventArgs saea)
+        private static void OnAsyncOperationCompleted(object _, SocketAsyncEventArgs saea)
         {
             var relay = saea.UserToken as SocketRelay;
-            relay.StackDepth = 0;
-            relay.OnReceived();
-        }
-        private static void OnSaeaSendCompleted(object _, SocketAsyncEventArgs saea)
-        {
-            var relay = saea.UserToken as SocketRelay;
-            relay.StackDepth = 0;
-            relay.OnSent();
+            relay.Process();
         }
 
         public static void RelayBiDirectionally(Socket s1, Socket s2)
@@ -138,8 +126,8 @@ namespace MihaZupan
             relayOne.Other = relayTwo;
             relayTwo.Other = relayOne;
 
-            Task.Run(relayOne.StartRelaying);
-            Task.Run(relayTwo.StartRelaying);
+            Task.Run(relayOne.Process);
+            Task.Run(relayTwo.Process);
         }
     }
 }
