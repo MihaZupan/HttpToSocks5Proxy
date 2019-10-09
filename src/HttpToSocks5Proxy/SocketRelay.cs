@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace MihaZupan
@@ -126,8 +127,8 @@ namespace MihaZupan
             relayOne.Other = relayTwo;
             relayTwo.Other = relayOne;
 
-            Task.Run(relayOne.Process);
-            Task.Run(relayTwo.Process);
+            Task.Run(new Action(relayOne.Process));
+            Task.Run(new Action(relayTwo.Process));
         }
     }
 }

@@ -13,13 +13,11 @@ namespace Socks5Proxy.Tests
                 new ProxyInfo("proxy-server.com", 1080),
             });
             var handler = new HttpClientHandler { Proxy = proxy };
-            HttpClient httpClient = new HttpClient(handler, true);
+            var httpClient = new HttpClient(handler, true);
 
-            var result = await httpClient.SendAsync(
-                new HttpRequestMessage(HttpMethod.Get, "https://httpbin.org/ip"));
+            var result = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https://httpbin.org/ip"));
 
             result.EnsureSuccessStatusCode();
-
             Console.WriteLine("HTTPS GET: " + await result.Content.ReadAsStringAsync());
 
             Console.ReadLine();
