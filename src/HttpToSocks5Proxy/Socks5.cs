@@ -4,12 +4,13 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using MihaZupan.Dns;
 
 namespace MihaZupan
 {
     internal static class Socks5
     {
-        public static SocketConnectionResult TryCreateTunnel(Socket socks5Socket, string destAddress, int destPort, ProxyInfo proxy, bool resolveHostnamesLocally)
+        public static SocketConnectionResult TryCreateTunnel(Socket socks5Socket, string destAddress, int destPort, ProxyInfo proxy, IDnsResolver dnsResolver = null)
         {
             try
             {
@@ -45,9 +46,15 @@ namespace MihaZupan
                 else if (buffer[1] != (byte)Authentication.NoAuthentication)
                     return SocketConnectionResult.AuthenticationError;
 
-                if (resolveHostnamesLocally && Helpers.GetAddressType(destAddress) == AddressType.DomainName)
+                if (dnsResolver != null && Helpers.GetAddressType(destAddress) == AddressType.DomainName)
                 {
-                    destAddress = destAddress.Resolve().ToString();
+                    var ipAddress = dnsResolver.TryResolve(destAddress);
+                    if (ipAddress == null)
+                    {
+                        return SocketConnectionResult.HostUnreachable;
+                    }
+
+                    destAddress = ipAddress.ToString();
                 }
 
                 // SEND REQUEST
