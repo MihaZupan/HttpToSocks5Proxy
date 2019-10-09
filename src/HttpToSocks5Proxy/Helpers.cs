@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using MihaZupan.Dns;
 
 namespace MihaZupan
 {
@@ -43,12 +44,6 @@ namespace MihaZupan
             }
 
             return false;
-        }
-
-        public static IPAddress Resolve(this string hostname)
-        {
-            if (IPAddress.TryParse(hostname, out IPAddress hostIP)) return hostIP;
-            return Dns.GetHostAddresses(hostname)[0];
         }
 
         private static readonly string[] HopByHopHeaders = new string[]
