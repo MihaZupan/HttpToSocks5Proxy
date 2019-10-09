@@ -9,22 +9,24 @@ namespace Socks5Proxy.Tests
     {
         static async Task Main()
         {
-            var proxy = new HttpToSocks5Proxy(new[] { new ProxyInfo("proxy-server.com", 1080) });
+            await Test(false);
+            await Test(true);
+
+            Console.ReadLine();
+        }
+
+        static async Task Test(bool resolveHostnamesLocally)
+        {
+            var proxy = new HttpToSocks5Proxy(new[] { new ProxyInfo("127.0.0.1", 9050) });
             var handler = new HttpClientHandler { Proxy = proxy };
             HttpClient httpClient = new HttpClient(handler, true);
+
+            proxy.ResolveHostnamesLocally = resolveHostnamesLocally;
 
             var result = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https://httpbin.org/ip"));
             result.EnsureSuccessStatusCode();
 
-            Console.WriteLine("#1 HTTPS GET: " + await result.Content.ReadAsStringAsync());
-
-            proxy.ResolveHostnamesLocally = true;
-            result = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, "https://httpbin.org/ip"));
-            result.EnsureSuccessStatusCode();
-
-            Console.WriteLine("#2 HTTPS GET: " + await result.Content.ReadAsStringAsync());
-
-            Console.ReadLine();
+            Console.WriteLine("HTTPS GET: " + await result.Content.ReadAsStringAsync());
         }
     }
 }

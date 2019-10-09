@@ -36,7 +36,17 @@ namespace MihaZupan
         /// </summary>
         public int InternalServerPort { get; private set; }
 
-        public IDnsResolver DnsResolver { get; private set; }
+        /// <summary>
+        /// A custom domain name resolver
+        /// </summary>
+        public IDnsResolver DnsResolver
+        {
+            set
+            {
+                dnsResolver = value ?? throw new ArgumentNullException(nameof(value));
+            }
+        }
+        private IDnsResolver dnsResolver;
 
         private readonly Uri ProxyUri;
         private readonly Socket InternalServerSocket;
@@ -56,9 +66,8 @@ namespace MihaZupan
         /// <param name="socks5Hostname">IP address or hostname of the Socks5 proxy server</param>
         /// <param name="socks5Port">Port of the Socks5 proxy server</param>
         /// <param name="internalServerPort">The port to listen on with the internal server, 0 means it is selected automatically</param>
-        /// <param name="dnsResolver">A custom domain name resolver which will be used if ResolveHostnamesLocally is set to true</param>
-        public HttpToSocks5Proxy(string socks5Hostname, int socks5Port, int internalServerPort = 0, IDnsResolver dnsResolver = null)
-            : this(new[] { new ProxyInfo(socks5Hostname, socks5Port) }, internalServerPort, dnsResolver) { }
+        public HttpToSocks5Proxy(string socks5Hostname, int socks5Port, int internalServerPort = 0)
+            : this(new[] { new ProxyInfo(socks5Hostname, socks5Port) }, internalServerPort) { }
 
         /// <summary>
         /// Create an Http(s) to Socks5 proxy using username and password authentication
@@ -69,17 +78,15 @@ namespace MihaZupan
         /// <param name="username">Username for the Socks5 server authentication</param>
         /// <param name="password">Password for the Socks5 server authentication</param>
         /// <param name="internalServerPort">The port to listen on with the internal server, 0 means it is selected automatically</param>
-        /// <param name="dnsResolver">A custom domain name resolver which will be used if ResolveHostnamesLocally is set to true</param>
-        public HttpToSocks5Proxy(string socks5Hostname, int socks5Port, string username, string password, int internalServerPort = 0, IDnsResolver dnsResolver = null)
-            : this(new[] { new ProxyInfo(socks5Hostname, socks5Port, username, password) }, internalServerPort, dnsResolver) { }
+        public HttpToSocks5Proxy(string socks5Hostname, int socks5Port, string username, string password, int internalServerPort = 0)
+            : this(new[] { new ProxyInfo(socks5Hostname, socks5Port, username, password) }, internalServerPort) { }
 
         /// <summary>
         /// Create an Http(s) to Socks5 proxy using one or multiple chained proxies
         /// </summary>
         /// <param name="proxyList">List of proxies to route through</param>
         /// <param name="internalServerPort">The port to listen on with the internal server, 0 means it is selected automatically</param>
-        /// <param name="dnsResolver">A custom domain name resolver which will be used if ResolveHostnamesLocally is set to true</param>
-        public HttpToSocks5Proxy(ProxyInfo[] proxyList, int internalServerPort = 0, IDnsResolver dnsResolver = null)
+        public HttpToSocks5Proxy(ProxyInfo[] proxyList, int internalServerPort = 0)
         {
             if (internalServerPort < 0 || internalServerPort > 65535) throw new ArgumentOutOfRangeException(nameof(internalServerPort));
             if (proxyList == null) throw new ArgumentNullException(nameof(proxyList));
@@ -88,7 +95,7 @@ namespace MihaZupan
 
             ProxyList = proxyList;
             InternalServerPort = internalServerPort;
-            DnsResolver = dnsResolver ?? new DefaultDnsResolver();
+            dnsResolver = new DefaultDnsResolver();
 
             InternalServerSocket = CreateSocket();
             InternalServerSocket.Bind(new IPEndPoint(IPAddress.Any, InternalServerPort));
@@ -134,7 +141,7 @@ namespace MihaZupan
                     try
                     {
                         socks5Socket = CreateSocket();
-                        socks5Socket.Connect(DnsResolver.TryResolve(ProxyList[0].Hostname), ProxyList[0].Port);
+                        socks5Socket.Connect(dnsResolver.TryResolve(ProxyList[0].Hostname), ProxyList[0].Port);
                     }
                     catch (SocketException ex)
                     {
@@ -154,7 +161,7 @@ namespace MihaZupan
                         {
                             var proxy = ProxyList[i];
                             var nextProxy = ProxyList[i + 1];
-                            result = Socks5.TryCreateTunnel(socks5Socket, nextProxy.Hostname, nextProxy.Port, proxy, ResolveHostnamesLocally ? DnsResolver : null);
+                            result = Socks5.TryCreateTunnel(socks5Socket, nextProxy.Hostname, nextProxy.Port, proxy, ResolveHostnamesLocally ? dnsResolver : null);
                             if (result != SocketConnectionResult.OK)
                             {
                                 SendError(clientSocket, result, httpVersion);
@@ -166,7 +173,7 @@ namespace MihaZupan
                         if (success)
                         {
                             var lastProxy = ProxyList.Last();
-                            result = Socks5.TryCreateTunnel(socks5Socket, hostname, port, lastProxy, ResolveHostnamesLocally ? DnsResolver : null);
+                            result = Socks5.TryCreateTunnel(socks5Socket, hostname, port, lastProxy, ResolveHostnamesLocally ? dnsResolver : null);
                             if (result != SocketConnectionResult.OK)
                             {
                                 SendError(clientSocket, result, httpVersion);
