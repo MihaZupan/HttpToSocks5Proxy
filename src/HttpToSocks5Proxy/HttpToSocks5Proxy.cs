@@ -105,7 +105,7 @@ namespace MihaZupan
 
             ProxyUri = new Uri("http://127.0.0.1:" + InternalServerPort);
             InternalServerSocket.Listen(8);
-            InternalServerSocket.BeginAccept(new AsyncCallback(OnAcceptCallback), null);
+            InternalServerSocket.BeginAccept(OnAcceptCallback, null);
         }
         #endregion
 
@@ -122,7 +122,7 @@ namespace MihaZupan
 
             try
             {
-                InternalServerSocket.BeginAccept(new AsyncCallback(OnAcceptCallback), null);
+                InternalServerSocket.BeginAccept(OnAcceptCallback, null);
             }
             catch { StopInternalServer(); }
 
@@ -229,16 +229,10 @@ namespace MihaZupan
             httpVersion = null;
             connect = false;
             request = null;
-            overReadBuffer = null;
 
-            if (!TryReadHeaders(clientSocket, out byte[] headerBuffer, out int received, out int endOfHeader))
+            if (!TryReadHeaders(clientSocket, out string headerString, out overReadBuffer))
                 return false;
 
-            // If we reach this point we can be sure that we have read the entire header
-            // We could have over-read in case of an HTTP request with a body
-            int overRead = received - endOfHeader;
-
-            string headerString = Encoding.ASCII.GetString(headerBuffer, 0, endOfHeader);
             List<string> headerLines = headerString.Split('\n').Select(i => i.TrimEnd('\r')).Where(i => i.Length > 0).ToList();
             string[] methodLine = headerLines[0].Split(' ');
             if (methodLine.Length != 3) // METHOD URI HTTP/X.Y
@@ -356,21 +350,18 @@ namespace MihaZupan
             }
             #endregion Hostname and port
 
-            if (connect && overRead > 0)
-            {
-                overReadBuffer = new byte[overRead];
-                Array.Copy(headerBuffer, endOfHeader, overReadBuffer, 0, overRead);
-            }
-
             return true;
         }
-        private static bool TryReadHeaders(Socket clientSocket, out byte[] headersBuffer, out int received, out int endOfHeader)
+        private static bool TryReadHeaders(Socket clientSocket, out string headers, out byte[] overRead)
         {
-            received = 0;
-            endOfHeader = 0;
-            headersBuffer = new byte[8192];
+            headers = null;
+            overRead = null;
+
+            var headersBuffer = new byte[8192];
+            int received = 0;
             int left = 8192;
             int offset;
+            int endOfHeader;
             // According to https://stackoverflow.com/a/686243/6845657 even Apache gives up after 8KB
 
             do
@@ -382,11 +373,24 @@ namespace MihaZupan
                 }
                 offset = received;
                 int read = clientSocket.Receive(headersBuffer, received, left, SocketFlags.None);
+                if (read == 0)
+                {
+                    return false;
+                }
                 received += read;
                 left -= read;
             }
             // received - 3 is used because we could have read the start of the double new line in the previous read
             while (!headersBuffer.ContainsDoubleNewLine(Math.Max(0, offset - 3), received, out endOfHeader));
+
+            headers = Encoding.ASCII.GetString(headersBuffer, 0, endOfHeader);
+
+            if (received != endOfHeader)
+            {
+                int overReadCount = received - endOfHeader;
+                overRead = new byte[overReadCount];
+                Array.Copy(headersBuffer, endOfHeader, overRead, 0, overReadCount);
+            }
 
             return true;
         }
