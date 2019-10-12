@@ -119,7 +119,7 @@ namespace MihaZupan
 				clientSocket = InternalServerSocket.EndAccept(AR);
 				var remotePoint = (IPEndPoint)clientSocket.RemoteEndPoint;
 				var localPoint = (IPEndPoint)clientSocket.LocalEndPoint;
-				if (remotePoint.Address != localPoint.Address)
+				if (!localPoint.Address.Equals(remotePoint.Address))
 				{
 					clientSocket.TryDispose();
 					clientSocket = null;
