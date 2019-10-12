@@ -116,9 +116,16 @@ namespace MihaZupan
             Socket clientSocket = null;
             try
             {
-                clientSocket = InternalServerSocket.EndAccept(AR);
-            }
-            catch { }
+				clientSocket = InternalServerSocket.EndAccept(AR);
+				var remotePoint = (IPEndPoint)clientSocket.RemoteEndPoint;
+				var localPoint = (IPEndPoint)clientSocket.LocalEndPoint;
+				if (remotePoint.Address != localPoint.Address)
+				{
+					clientSocket.TryDispose();
+					clientSocket = null;
+				}
+			}
+			catch { }
 
             try
             {
