@@ -12,29 +12,70 @@ namespace MihaZupan
     /// <summary>
     /// Presents itself as an HTTP(s) proxy, but connects to a SOCKS5 proxy behind-the-scenes
     /// </summary>
-    public class HttpToSocks5Proxy : IWebProxy
+    public class HttpToSocks5Proxy : IWebProxy, IDisposable
     {
+        #region Fields
+
+        private IDnsResolver dnsResolver;
+
+        private readonly Uri ProxyUri;
+        private readonly Socket InternalServerSocket;
+        private int internalServerPort;
+        private bool resolveHostnamesLocally = false;
+
+        private readonly ProxyInfo[] ProxyList;
+
+        private bool Stopped = false;
+        private bool disposed;
+
+        #endregion
+
         /// <summary>
         /// Ignored by this <see cref="IWebProxy"/> implementation
         /// </summary>
         public ICredentials Credentials { get; set; }
+
         /// <summary>
         /// Returned <see cref="Uri"/> is constant for a single <see cref="HttpToSocks5Proxy"/> instance
         /// <para>Address is a local address, the port is <see cref="InternalServerPort"/></para>
         /// </summary>
         /// <param name="destination">Ignored by this <see cref="IWebProxy"/> implementation</param>
         /// <returns></returns>
-        public Uri GetProxy(Uri destination) => ProxyUri;
+        public Uri GetProxy(Uri destination)
+        {
+            if (disposed)
+                throw new ObjectDisposedException(nameof(HttpToSocks5Proxy));
+            return ProxyUri;
+        }
+
         /// <summary>
         /// Always returns false
         /// </summary>
         /// <param name="host">Ignored by this <see cref="IWebProxy"/> implementation</param>
         /// <returns></returns>
-        public bool IsBypassed(Uri host) => false;
+        public bool IsBypassed(Uri host)
+        {
+            if (disposed)
+                throw new ObjectDisposedException(nameof(HttpToSocks5Proxy));
+            return false;
+        }
+
         /// <summary>
         /// The port on which the internal server is listening
         /// </summary>
-        public int InternalServerPort { get; private set; }
+        public int InternalServerPort
+        {
+            get
+            {
+                if (disposed)
+                    throw new ObjectDisposedException(nameof(HttpToSocks5Proxy));
+                return internalServerPort;
+            }
+            private set
+            {
+                internalServerPort = value;
+            }
+        }
 
         /// <summary>
         /// A custom domain name resolver
@@ -43,21 +84,32 @@ namespace MihaZupan
         {
             set
             {
+                if (disposed)
+                    throw new ObjectDisposedException(nameof(HttpToSocks5Proxy));
                 dnsResolver = value ?? throw new ArgumentNullException(nameof(value));
             }
         }
-        private IDnsResolver dnsResolver;
-
-        private readonly Uri ProxyUri;
-        private readonly Socket InternalServerSocket;
-
-        private readonly ProxyInfo[] ProxyList;
 
         /// <summary>
         /// Controls whether domain names are resolved locally or passed to the proxy server for evaluation
         /// <para>False by default</para>
         /// </summary>
-        public bool ResolveHostnamesLocally = false;
+        public bool ResolveHostnamesLocally
+        {
+            get
+            {
+                if (disposed)
+                    throw new ObjectDisposedException(nameof(HttpToSocks5Proxy));
+                return resolveHostnamesLocally;
+            }
+            set
+            {
+                if (disposed)
+                    throw new ObjectDisposedException(nameof(HttpToSocks5Proxy));
+                resolveHostnamesLocally = value;
+            }
+        }
+
 
         #region Constructors
         /// <summary>
@@ -124,7 +176,10 @@ namespace MihaZupan
             {
                 InternalServerSocket.BeginAccept(OnAcceptCallback, null);
             }
-            catch { StopInternalServer(); }
+            catch
+            {
+                Dispose();
+            }
 
             if (clientSocket != null)
                 HandleRequest(clientSocket);
@@ -403,12 +458,35 @@ namespace MihaZupan
         private static Socket CreateSocket()
             => new Socket(SocketType.Stream, ProtocolType.Tcp);
 
-        private bool Stopped = false;
-        public void StopInternalServer()
+        private void StopInternalServer()
         {
             if (Stopped) return;
             Stopped = true;
             InternalServerSocket.Close();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                }
+
+                StopInternalServer();
+                disposed = true;
+            }
+        }
+
+        ~HttpToSocks5Proxy()
+        {
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

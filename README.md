@@ -17,6 +17,9 @@ var result = await httpClient.SendAsync(
     new HttpRequestMessage(HttpMethod.Get, "https://httpbin.org/ip"));
 
 Console.WriteLine("HTTPS GET: " + await result.Content.ReadAsStringAsync());
+
+proxy.Dispose();
+httpClient.Dispose();
 ```
 
 ## Usage with Telegram.Bot library
