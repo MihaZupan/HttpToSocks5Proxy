@@ -150,8 +150,8 @@ namespace MihaZupan
             //request[2] = 0x00;
             request[3] = (byte)addressType;
             Array.Copy(addressBytes, 0, request, 4, addressLength);
-            request[request.Length - 2] = (byte)(port / 256);
-            request[request.Length - 1] = (byte)(port % 256);
+            request[request.Length - 2] = (byte)((port & 0xff00) >> 8);
+            request[request.Length - 1] = (byte)(port & 0xff)
             return request;
         }
         public static byte[] BuildAuthenticationMessage(string username, string password)
