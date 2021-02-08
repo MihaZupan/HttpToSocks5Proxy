@@ -98,7 +98,7 @@ namespace MihaZupan
             dnsResolver = new DefaultDnsResolver();
 
             InternalServerSocket = CreateSocket();
-            InternalServerSocket.Bind(new IPEndPoint(IPAddress.Any, InternalServerPort));
+            InternalServerSocket.Bind(new IPEndPoint(IPAddress.Loopback, InternalServerPort));
 
             if (InternalServerPort == 0)
                 InternalServerPort = ((IPEndPoint)(InternalServerSocket.LocalEndPoint)).Port;

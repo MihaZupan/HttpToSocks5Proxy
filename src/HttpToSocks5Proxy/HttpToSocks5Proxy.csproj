@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net451</TargetFrameworks>
     <AssemblyName>MihaZupan.HttpToSocks5Proxy</AssemblyName>
     <RootNamespace>MihaZupan.HttpToSocks5Proxy</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
