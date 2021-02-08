@@ -1,3 +1,15 @@
+# HttpProxyOverSocks5
+
+A program HttpProxyOverSocks5 is added to use the library to provide a Http proxy over socks5 proxy.  
+  
+Usage:  
+  
+HttpProxyOverSocks5 socks5Hostname socks5Port httpPort
+  
+For example:  
+  
+HttpProxyOverSocks5 127.0.0.1 1080 8118
+
 # HttpToSocks5Proxy [![NuGet](https://img.shields.io/nuget/v/HttpToSocks5Proxy.svg)](https://www.nuget.org/packages/HttpToSocks5Proxy/)
 
 This library allows you to connect over Socks5 proxies when using the .NET `HttpClient`.
